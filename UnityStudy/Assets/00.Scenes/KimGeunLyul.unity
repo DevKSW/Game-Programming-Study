@@ -129,6 +129,7 @@ GameObject:
   m_Component:
   - component: {fileID: 472767546}
   - component: {fileID: 472767545}
+  - component: {fileID: 472767547}
   m_Layer: 0
   m_Name: Tilemap
   m_TagString: Untagged
@@ -164,6 +165,25 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &472767547
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 472767544}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 79849d95480e8434ab4a4ecc3bee3ee2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AstarMap
+  searchDelay: 0.1
+  searchStartPos:
+    xPos: 0
+    yPos: 1
+  searchTargetPos:
+    xPos: -1
+    yPos: -2
 --- !u!1 &683657276
 GameObject:
   m_ObjectHideFlags: 0

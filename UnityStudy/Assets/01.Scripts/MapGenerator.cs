@@ -8,6 +8,7 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private float tileSpace;
 
     private TileMap tileMap;
+    private AstarMap astarMap;
 
     private void Start()
     {
@@ -30,9 +31,14 @@ public class MapGenerator : MonoBehaviour
             }
         }
 
-        GenerateMaze(new BoardPos(0, 1), new BoardPos(mapWidth - 1, mapHeight - 2));
+        astarMap = FindAnyObjectByType<AstarMap>();
+        astarMap.Initialize();
+
+        GenerateMaze();
 
         AdjustCameraCenter();
+
+        astarMap.StartPathfinding();
     }
 
     public void AdjustCameraCenter()
@@ -46,8 +52,11 @@ public class MapGenerator : MonoBehaviour
         Camera.main.orthographicSize = longestSize / 2 + longestSize / 2 * 0.1f + longestSize * tileSpace;
     }
 
-    private void GenerateMaze(BoardPos _startPos, BoardPos _endPos)
+    private void GenerateMaze()
     {
+        BoardPos startPos = astarMap.SearchStartPos;
+        BoardPos endPos = astarMap.SearchTargetPos;
+
         for(int x = 0; x < mapWidth; x++)
         {
             for(int y = 0; y < mapHeight; y++)
@@ -55,7 +64,7 @@ public class MapGenerator : MonoBehaviour
                 BoardPos currentBoardPos = new BoardPos(x, y);
                 Tile currentTile = tileMap.GetTile(currentBoardPos);
 
-                if(currentBoardPos.Equals(_startPos) || currentBoardPos.Equals(_endPos))
+                if(currentBoardPos.Equals(startPos) || currentBoardPos.Equals(endPos))
                 {
                     continue;
                 }

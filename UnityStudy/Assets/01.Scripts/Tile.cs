@@ -1,11 +1,13 @@
+using System;
 using UnityEngine;
 
+[Serializable]
 public struct BoardPos
 {
-    private int xPos;
+    [SerializeField] private int xPos;
     public int XPos => xPos;
 
-    private int yPos;
+    [SerializeField] private int yPos;
     public int YPos => yPos;
 
     public BoardPos(int _xPos, int _yPos)

@@ -5,8 +5,12 @@ public class TileMap : MonoBehaviour
     [SerializeField] private GameObject tilePrefab;
 
     private Tile[,] tiles;
-    private int mapWidth;
-    private int mapHeight;
+
+    private int mapWidth = 0;
+    public int MapWidth => mapWidth;
+
+    private int mapHeight = 0;
+    public int MapHeight => mapHeight;
 
     public void InitTiles(int _mapWidth, int _mapHeight)
     {
@@ -55,11 +59,26 @@ public class TileMap : MonoBehaviour
         int xPos = _boardPos.XPos;
         int yPos = _boardPos.YPos;
 
-        return xPos >= 0 && yPos >= 0 && xPos < mapWidth && yPos < mapHeight;
+        if(xPos >= 0 && yPos >= 0 && xPos < mapWidth && yPos < mapHeight)
+        {
+            return true;
+        }
+        else
+        {
+            Debug.LogWarning($"Position ({xPos}, {yPos}) is unvalid!");
+            return false;
+        }
     }
 
     public Tile GetTile(BoardPos _boardPos)
     {
         return IsPositionValid(_boardPos) == true ? tiles[_boardPos.XPos, _boardPos.YPos] : null;
+    }
+
+    public bool IsTilePassable(BoardPos _boardPos)
+    {
+        Tile targetTile = GetTile(_boardPos);
+
+        return targetTile != null && targetTile.GetTileType() == ETileType.TILE;
     }
 }
