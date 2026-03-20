@@ -12,12 +12,12 @@ public class TileMap : MonoBehaviour
     {
         if(tiles != null)
         {
-            for(int i = 0; i < mapWidth; i++)
+            for(int x = 0; x < mapWidth; x++)
             {
-                for(int j = 0; j < mapHeight; j++)
+                for(int y = 0; y < mapHeight; y++)
                 {
-                    Tile destroyTarget = tiles[i, j];
-                    tiles[i, j] = null;
+                    Tile destroyTarget = tiles[x, y];
+                    tiles[x, y] = null;
                     Destroy(destroyTarget);
                 }
             }
@@ -28,13 +28,13 @@ public class TileMap : MonoBehaviour
 
         tiles = new Tile[_mapWidth, _mapHeight];
 
-        for(int i = 0; i < mapWidth; i++)
+        for(int x = 0; x < mapWidth; x++)
         {
-            for(int j = 0; j < mapHeight; j++)
+            for(int y = 0; y < mapHeight; y++)
             {
                 Tile newTile = Instantiate(tilePrefab, this.transform).GetComponent<Tile>();
-                newTile.SetTile(new BoardPos(i, j), ETileType.NONE);
-                tiles[i, j] = newTile;
+                newTile.SetTile(new BoardPos(x, y), ETileType.NONE);
+                tiles[x, y] = newTile;
             }
         }
     }
@@ -55,7 +55,7 @@ public class TileMap : MonoBehaviour
         int xPos = _boardPos.XPos;
         int yPos = _boardPos.YPos;
 
-        return xPos >= 0 || yPos >= 0 || xPos < mapWidth || yPos < mapHeight;
+        return xPos >= 0 && yPos >= 0 && xPos < mapWidth && yPos < mapHeight;
     }
 
     public Tile GetTile(BoardPos _boardPos)

@@ -208,8 +208,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e761bec26efb3da41bfbf198757f1925, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MapGenerator
-  mapWidth: 20
-  mapHeight: 20
+  mapWidth: 25
+  mapHeight: 25
   tileSpace: 0.1
 --- !u!1 &1595112979
 GameObject:
