@@ -3,6 +3,8 @@ using UnityEngine;
 public class MapGenerator : MonoBehaviour
 {
     [Header("Map Settings")]
+    [SerializeField] private EMapType mapType;
+    [SerializeField] private int seed;
     [SerializeField] private int mapWidth;
     [SerializeField] private int mapHeight;
     [SerializeField] private float tileSpace;
@@ -12,6 +14,7 @@ public class MapGenerator : MonoBehaviour
 
     private void Start()
     {
+        Random.InitState(seed);
         Generate();
     }
 
@@ -34,7 +37,19 @@ public class MapGenerator : MonoBehaviour
         astarMap = FindAnyObjectByType<AstarMap>();
         astarMap.Initialize();
 
-        GenerateMaze();
+        switch(mapType)
+        {
+            case EMapType.WALL:
+                GenerateWall();
+                break;
+            
+            case EMapType.MAZE:
+                GenerateMaze();
+                break;
+
+            default:
+                break;
+        }
 
         AdjustCameraCenter();
 
@@ -50,6 +65,34 @@ public class MapGenerator : MonoBehaviour
 
         int longestSize = Mathf.Max(mapWidth, mapHeight);
         Camera.main.orthographicSize = longestSize / 2 + longestSize / 2 * 0.1f + longestSize * tileSpace;
+    }
+
+    private void GenerateWall()
+    {
+        BoardPos startPos = astarMap.SearchStartPos;
+        BoardPos endPos = astarMap.SearchTargetPos;
+
+        int halfWidth = mapWidth / 2;
+        int halfHeight = mapHeight / 2;
+
+        for(int x = 0; x < mapWidth; x++)
+        {
+            for(int y = 0; y < mapHeight; y++)
+            {
+                BoardPos currentBoardPos = new BoardPos(x, y);
+                Tile currentTile = tileMap.GetTile(currentBoardPos);
+
+                if(currentBoardPos.Equals(startPos) || currentBoardPos.Equals(endPos))
+                {
+                    continue;
+                }
+                else if(x == halfWidth && y > halfHeight - halfHeight / 2 && y < halfHeight + halfHeight / 2 ||
+                    y == halfHeight && x > halfWidth - halfWidth / 2 && x < halfWidth + halfWidth / 2)
+                {
+                    currentTile.SetTile(ETileType.OBSTACLE);
+                }
+            }
+        }
     }
 
     private void GenerateMaze()

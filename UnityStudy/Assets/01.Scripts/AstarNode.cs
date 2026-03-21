@@ -4,7 +4,7 @@ public class AstarNode
     public BoardPos position => boardPos;
 
     private AstarNode parentNode;
-    public AstarNode ParentNode;
+    public AstarNode ParentNode {get => parentNode; set => parentNode = value;}
 
     private float gCost;
     public float GCost {get => gCost; set => gCost = value;}
@@ -17,6 +17,7 @@ public class AstarNode
     public AstarNode(BoardPos _boardPos)
     {
         boardPos = _boardPos;
-        gCost = 9999;
+        gCost = int.MaxValue;
+        hCost = 0;
     }
 }

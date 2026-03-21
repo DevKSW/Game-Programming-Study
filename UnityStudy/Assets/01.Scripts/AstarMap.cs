@@ -1,19 +1,21 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class AstarMap : MonoBehaviour
 {
     private TileMap tilemap;
 
-    [SerializeField] private float searchDelay;
+    [SerializeField] private EHeuristicType heuristicType;
+    [SerializeField] private float heuristicMultiplier = 1;
 
     [SerializeField] private BoardPos searchStartPos;
     public BoardPos SearchStartPos => searchStartPos;
 
     [SerializeField] private BoardPos searchTargetPos;
     public BoardPos SearchTargetPos => searchTargetPos;
+
+    [SerializeField] private float searchDelay;
 
     private AstarNode[,] astarNodes;
     private int mapWidth = 0;
@@ -66,25 +68,25 @@ public class AstarMap : MonoBehaviour
 
     private IEnumerator ProcessPathfinding(BoardPos _startPos, BoardPos _targetPos, float _searchDelay)
     {
-        tilemap.GetTile(_startPos).ChangeTileColor(Color.blue);
-        tilemap.GetTile(_targetPos).ChangeTileColor(Color.blue);
+        MarkNodeWithColor(_startPos, _targetPos, _startPos, Color.blue, true);
+        MarkNodeWithColor(_startPos, _targetPos, _targetPos, Color.blue, true);
 
-        SortedSet<AstarNode> openSet = new SortedSet<AstarNode>(Comparer<AstarNode>.Create((a, b) => 
-            a.FCost == b.FCost ? a.HCost.CompareTo(b.HCost) : a.FCost.CompareTo(b.FCost)));
-
-        HashSet<AstarNode> closedSet = new HashSet<AstarNode>();
+        List<AstarNode> openList = new List<AstarNode>();
+        List<AstarNode> closedList = new List<AstarNode>();
 
         AstarNode startNode = astarNodes[_startPos.XPos, _startPos.YPos];
         startNode.GCost = 0;
 
-        openSet.Add(startNode);
+        openList.Add(startNode);
 
-        while (openSet.Count > 0)
+        while (openList.Count > 0)
         {
             yield return new WaitForSeconds(_searchDelay);
 
-            AstarNode currentNode = openSet.First();
-            openSet.Remove(currentNode);
+            AstarNode currentNode = FindHighestPriorityNode(openList);
+            openList.Remove(currentNode);
+
+            MarkNodeWithColor(_startPos, _targetPos, currentNode.position, Color.orange);
             
             if (_targetPos.Equals(currentNode.position))
             {
@@ -94,51 +96,45 @@ public class AstarMap : MonoBehaviour
 
                     if(currentNode.position.Equals(_startPos) == false)
                     {
-                        tilemap.GetTile(currentNode.position).ChangeTileColor(Color.green);
+                        MarkNodeWithColor(_startPos, _targetPos, currentNode.position, Color.green);
                     }
                 }
 
                 break;             
             }
             
-            closedSet.Add(currentNode);
+            closedList.Add(currentNode);
 
             foreach (var dir in directions)
             {
                 BoardPos newPos = new BoardPos(currentNode.position.XPos + dir.x, currentNode.position.YPos + dir.y);
 
-                if(tilemap.IsTilePassable(newPos) == false)
-                {
-                    continue;
-                }
-                
-                if (closedSet.Contains(astarNodes[newPos.XPos, newPos.YPos]))
+                if(tilemap.IsTilePassable(newPos) == false ||
+                    closedList.Contains(astarNodes[newPos.XPos, newPos.YPos]))
                 {
                     continue;
                 }
 
                 AstarNode neighborNode = astarNodes[newPos.XPos, newPos.YPos];
 
-                if(neighborNode.position.Equals(_startPos) == false && neighborNode.position.Equals(_targetPos) == false)
-                {
-                    tilemap.GetTile(neighborNode.position).ChangeTileColor(Color.yellow);
-                }
-
                 float hCost = GetHeuristic(newPos, _targetPos);
                 float gCost = (dir.x == 0 || dir.y == 0) ? 1.0f : 1.4f;
+                gCost += currentNode.GCost;
 
                 if (hCost + gCost < neighborNode.FCost)
                 {
-                    if (openSet.Contains(neighborNode))
+                    if (openList.Contains(neighborNode))
                     {
-                        openSet.Remove(neighborNode);
+                        openList.Remove(neighborNode);
                     }
                 
                     neighborNode.GCost = gCost;
                     neighborNode.HCost = hCost;
                     neighborNode.ParentNode = currentNode;
 
-                    openSet.Add(neighborNode);
+                    openList.Add(neighborNode);
+
+                    MarkNodeWithColor(_startPos, _targetPos, neighborNode.position, Color.yellow);
                 }
             }
         }
@@ -146,23 +142,57 @@ public class AstarMap : MonoBehaviour
         Debug.Log("Search Ended");
     }
 
+    private AstarNode FindHighestPriorityNode(List<AstarNode> _nodes)
+    {
+        AstarNode highestPriorityNode = null;
+
+        foreach(AstarNode node in _nodes)
+        {
+            if(highestPriorityNode == null || highestPriorityNode.FCost > node.FCost)
+            {
+                highestPriorityNode = node;
+            }
+        }
+
+        return highestPriorityNode;
+    }
+
     private float GetHeuristic(BoardPos _startPos, BoardPos _endPos)
     {
         float result = 0;
-        
-        // 유클리드
-        result = Mathf.Sqrt(Mathf.Pow(_startPos.XPos - _endPos.XPos, 2) + Mathf.Pow(_startPos.YPos - _endPos.YPos, 2));
 
-        
-        // 체비쇼프
-        /*result = Mathf.Abs(_startPos.XPos - _endPos.XPos) > Mathf.Abs(_startPos.YPos - _endPos.YPos)?
-            Mathf.Abs(_startPos.XPos - _endPos.XPos) : Mathf.Abs(_startPos.YPos - _endPos.YPos);*/
-        
-        
-        // 맨하탄
-        /*result = Mathf.Abs(_startPos.XPos - _endPos.XPos) + Mathf.Abs(_startPos.YPos - _endPos.YPos);*/
-        
-        return result;
+        switch(heuristicType)
+        {
+            case EHeuristicType.MANHATTAN_DISTANCE:
+                result = Mathf.Abs(_startPos.XPos - _endPos.XPos) + Mathf.Abs(_startPos.YPos - _endPos.YPos);
+                break;
+
+            case EHeuristicType.EUCLIDEAN_DISTANCE:
+                result = Mathf.Sqrt(Mathf.Pow(_startPos.XPos - _endPos.XPos, 2) + Mathf.Pow(_startPos.YPos - _endPos.YPos, 2));
+                break;
+
+            case EHeuristicType.CHEBYSHEV_DISTANCE:
+                result = Mathf.Abs(_startPos.XPos - _endPos.XPos) > Mathf.Abs(_startPos.YPos - _endPos.YPos)?
+                    Mathf.Abs(_startPos.XPos - _endPos.XPos) : Mathf.Abs(_startPos.YPos - _endPos.YPos);
+                break;
+
+            default:
+                break;
+        }
+
+        return result * heuristicMultiplier;
+    }
+
+    private void MarkNodeWithColor(BoardPos _startPos, BoardPos _endPos, BoardPos _targetPos, Color _color, bool _isOverlapWithStartEndAllowed = false)
+    {
+        if(_isOverlapWithStartEndAllowed == true)
+        {
+            tilemap.GetTile(_targetPos).ChangeTileColor(_color);
+        }
+        else if(_targetPos.Equals(_startPos) == false && _targetPos.Equals(_endPos) == false)
+        {
+            tilemap.GetTile(_targetPos).ChangeTileColor(_color);
+        }
     }
 
     public void ValidateSearchPosition()
