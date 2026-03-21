@@ -51,6 +51,7 @@ public class MapGenerator : MonoBehaviour
                 break;
         }
 
+        astarMap.PostProcess();
         AdjustCameraCenter();
 
         astarMap.StartPathfinding();

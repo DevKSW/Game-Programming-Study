@@ -7,7 +7,10 @@ public class AstarMap : MonoBehaviour
     private TileMap tilemap;
 
     [SerializeField] private EHeuristicType heuristicType;
+    public EHeuristicType HeuristicType => heuristicType;
+
     [SerializeField] private float heuristicMultiplier = 1;
+    public float HeuristicMultiplier => heuristicMultiplier;
 
     [SerializeField] private BoardPos searchStartPos;
     public BoardPos SearchStartPos => searchStartPos;
@@ -20,6 +23,9 @@ public class AstarMap : MonoBehaviour
     private AstarNode[,] astarNodes;
     private int mapWidth = 0;
     private int mapHeight = 0;
+
+    private int visitCount = 0;
+    public int VisitCount => visitCount;
 
     private Vector2Int[] directions =
     {
@@ -43,7 +49,19 @@ public class AstarMap : MonoBehaviour
         mapWidth = tilemap.MapWidth;
         mapHeight = tilemap.MapHeight;
 
+        visitCount = 0;
+
         ValidateSearchPosition();
+    }
+
+    public void PostProcess()
+    {
+        IPostProcessable[] postProcessables = GetComponents<IPostProcessable>();
+
+        foreach(IPostProcessable postProcessable in postProcessables)
+        {
+            postProcessable.PostProcess();
+        }
     }
 
     private void InitNodes()
@@ -87,6 +105,7 @@ public class AstarMap : MonoBehaviour
             openList.Remove(currentNode);
 
             MarkNodeWithColor(_startPos, _targetPos, currentNode.position, Color.orange);
+            ++visitCount;
             
             if (_targetPos.Equals(currentNode.position))
             {
@@ -123,11 +142,6 @@ public class AstarMap : MonoBehaviour
 
                 if (hCost + gCost < neighborNode.FCost)
                 {
-                    if (openList.Contains(neighborNode))
-                    {
-                        openList.Remove(neighborNode);
-                    }
-                
                     neighborNode.GCost = gCost;
                     neighborNode.HCost = hCost;
                     neighborNode.ParentNode = currentNode;
@@ -174,6 +188,10 @@ public class AstarMap : MonoBehaviour
             case EHeuristicType.CHEBYSHEV_DISTANCE:
                 result = Mathf.Abs(_startPos.XPos - _endPos.XPos) > Mathf.Abs(_startPos.YPos - _endPos.YPos)?
                     Mathf.Abs(_startPos.XPos - _endPos.XPos) : Mathf.Abs(_startPos.YPos - _endPos.YPos);
+                break;
+
+            case EHeuristicType.ALT:
+                result = GetComponent<ALT>().GetHeuristic(_startPos, _endPos);
                 break;
 
             default:

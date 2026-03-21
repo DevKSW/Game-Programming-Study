@@ -14,7 +14,9 @@ public enum EMapType
 
 public enum EHeuristicType
 {
+    ZERO_HEURISTIC,
     MANHATTAN_DISTANCE,
     EUCLIDEAN_DISTANCE,
     CHEBYSHEV_DISTANCE,
+    ALT,
 }
