@@ -3,27 +3,27 @@ using UnityEngine;
 
 public class UIManager : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI heuristicType;
-    [SerializeField] private TextMeshProUGUI heuristicMultiplier;
+    //[SerializeField] private TextMeshProUGUI heuristicType;
+    //[SerializeField] private TextMeshProUGUI heuristicMultiplier;
     [SerializeField] private TextMeshProUGUI visitCounter;
 
-    private AstarMap astarMap;
+    private PathfindManager pathfindManager;
 
     private void Awake()
     {
-        astarMap = FindAnyObjectByType<AstarMap>();
+        pathfindManager = FindAnyObjectByType<PathfindManager>();
 
-        RefreshHeuristicType();
-        heuristicMultiplier.text = $"Heuristic multiplier : {astarMap.HeuristicMultiplier}";
+        //RefreshHeuristicType();
+        //heuristicMultiplier.text = $"Heuristic multiplier : {astarMap.HeuristicMultiplier}";
         visitCounter.text = "";
     }
 
     public void Update()
     {
-        visitCounter.text = $"Visited node count : {astarMap.VisitCount}";
+        visitCounter.text = $"Visited node count : {pathfindManager.VisitCount}";
     }
 
-    private void RefreshHeuristicType()
+    /*private void RefreshHeuristicType()
     {
         heuristicType.text = "";
 
@@ -52,5 +52,5 @@ public class UIManager : MonoBehaviour
             default:
                 break;
         }
-    }
+    }*/
 }

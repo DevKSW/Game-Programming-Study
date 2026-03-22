@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ALT : MonoBehaviour, IPostProcessable, IHeuristic
+public class ALT : HeuristicBase, IPostProcessable
 {
     private TileMap tilemap;
 
@@ -108,7 +108,11 @@ public class ALT : MonoBehaviour, IPostProcessable, IHeuristic
                 if(costMap[currentPos.XPos, currentPos.YPos] + moveCost < costMap[newPos.XPos, newPos.YPos])
                 {
                     costMap[newPos.XPos, newPos.YPos] = costMap[currentPos.XPos, currentPos.YPos] + moveCost;
-                    openList.Add(newPos);
+
+                    if(openList.Contains(newPos) == false)
+                    {
+                        openList.Add(newPos);
+                    }
                 }
             }
         }
@@ -132,7 +136,7 @@ public class ALT : MonoBehaviour, IPostProcessable, IHeuristic
         return highestPriorityNode;
     }
 
-    public float GetHeuristic(BoardPos _startPos, BoardPos _endPos)
+    public override float GetHeuristic(BoardPos _startPos, BoardPos _endPos)
     {
         float biggestHeuristic = 0;
 

@@ -10,7 +10,7 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private float tileSpace;
 
     private TileMap tileMap;
-    private AstarMap astarMap;
+    private PathfindManager pathfindManager;
 
     private void Start()
     {
@@ -34,8 +34,8 @@ public class MapGenerator : MonoBehaviour
             }
         }
 
-        astarMap = FindAnyObjectByType<AstarMap>();
-        astarMap.Initialize();
+        pathfindManager = FindAnyObjectByType<PathfindManager>();
+        pathfindManager.Initialize();
 
         switch(mapType)
         {
@@ -51,10 +51,10 @@ public class MapGenerator : MonoBehaviour
                 break;
         }
 
-        astarMap.PostProcess();
+        pathfindManager.PostProcess();
         AdjustCameraCenter();
 
-        astarMap.StartPathfinding();
+        pathfindManager.StartPathfinding();
     }
 
     public void AdjustCameraCenter()
@@ -70,8 +70,8 @@ public class MapGenerator : MonoBehaviour
 
     private void GenerateWall()
     {
-        BoardPos startPos = astarMap.SearchStartPos;
-        BoardPos endPos = astarMap.SearchTargetPos;
+        BoardPos startPos = pathfindManager.SearchStartPos;
+        BoardPos endPos = pathfindManager.SearchTargetPos;
 
         int halfWidth = mapWidth / 2;
         int halfHeight = mapHeight / 2;
@@ -98,8 +98,8 @@ public class MapGenerator : MonoBehaviour
 
     private void GenerateMaze()
     {
-        BoardPos startPos = astarMap.SearchStartPos;
-        BoardPos endPos = astarMap.SearchTargetPos;
+        BoardPos startPos = pathfindManager.SearchStartPos;
+        BoardPos endPos = pathfindManager.SearchTargetPos;
 
         for(int x = 0; x < mapWidth; x++)
         {
