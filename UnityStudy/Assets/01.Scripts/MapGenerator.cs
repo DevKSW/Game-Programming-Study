@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class MapGenerator : MonoBehaviour
@@ -10,15 +11,13 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private float tileSpace;
 
     private TileMap tileMap;
-    private PathfindManager pathfindManager;
 
-    private void Start()
+    private void Awake()
     {
         Random.InitState(seed);
-        Generate();
     }
 
-    public void Generate()
+    public void BuildTilemap()
     {
         tileMap = FindAnyObjectByType<TileMap>();
 
@@ -33,32 +32,29 @@ public class MapGenerator : MonoBehaviour
                 tileMap.SetTile(currentBoardPos, tileWorldPosition, ETileType.TILE);
             }
         }
+    }
 
-        pathfindManager = FindAnyObjectByType<PathfindManager>();
-        pathfindManager.Initialize();
-
+    public void GenerateMap(BoardPos _startPos, BoardPos _endPos)
+    {
         switch(mapType)
         {
             case EMapType.WALL:
-                GenerateWall();
+                GenerateWall(_startPos, _endPos);
                 break;
 
             case EMapType.ROOM:
-                GenerateRoom();
+                GenerateRoom(_startPos, _endPos);
                 break;
             
             case EMapType.MAZE:
-                GenerateMaze();
+                GenerateMaze(_startPos, _endPos);
                 break;
 
             default:
                 break;
         }
 
-        pathfindManager.PostProcess();
         AdjustCameraCenter();
-
-        pathfindManager.StartPathfinding();
     }
 
     public void AdjustCameraCenter()
@@ -72,11 +68,8 @@ public class MapGenerator : MonoBehaviour
         Camera.main.orthographicSize = longestSize / 2 + longestSize / 2 * 0.1f + longestSize * tileSpace;
     }
 
-    private void GenerateWall()
+    private void GenerateWall(BoardPos _startPos, BoardPos _endPos)
     {
-        BoardPos startPos = pathfindManager.SearchStartPos;
-        BoardPos endPos = pathfindManager.SearchTargetPos;
-
         int halfWidth = mapWidth / 2;
         int halfHeight = mapHeight / 2;
 
@@ -87,7 +80,7 @@ public class MapGenerator : MonoBehaviour
                 BoardPos currentBoardPos = new BoardPos(x, y);
                 Tile currentTile = tileMap.GetTile(currentBoardPos);
 
-                if(currentBoardPos.Equals(startPos) || currentBoardPos.Equals(endPos))
+                if(currentBoardPos.Equals(_startPos) || currentBoardPos.Equals(_endPos))
                 {
                     continue;
                 }
@@ -100,11 +93,8 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    private void GenerateRoom()
+    private void GenerateRoom(BoardPos _startPos, BoardPos _endPos)
     {
-        BoardPos startPos = pathfindManager.SearchStartPos;
-        BoardPos endPos = pathfindManager.SearchTargetPos;
-
         int halfWidth = mapWidth / 2;
         int halfHeight = mapHeight / 2;
 
@@ -115,23 +105,35 @@ public class MapGenerator : MonoBehaviour
                 BoardPos currentBoardPos = new BoardPos(x, y);
                 Tile currentTile = tileMap.GetTile(currentBoardPos);
 
-                if(currentBoardPos.Equals(startPos) || currentBoardPos.Equals(endPos))
+                if(currentBoardPos.Equals(_startPos) || currentBoardPos.Equals(_endPos))
                 {
                     continue;
                 }
-                else if((x == halfWidth && y != 1 && y != mapHeight - 2) || (y == halfHeight && x != 1 && x != mapWidth - 2))
+                else if(x == halfWidth || y == halfHeight)
                 {
                     currentTile.SetTile(ETileType.OBSTACLE);
                 }
             }
         }
+
+        List<BoardPos> doorPositions = new List<BoardPos>();
+
+        doorPositions.Add(new BoardPos(halfWidth, 2));
+        doorPositions.Add(new BoardPos(halfWidth, mapHeight - 3));
+        doorPositions.Add(new BoardPos(mapWidth - 3, halfHeight));
+        doorPositions.Add(new BoardPos(2, halfHeight));
+
+        doorPositions.RemoveAt(Random.Range(0, 4));
+
+        foreach(BoardPos doorPosition in doorPositions)
+        {
+            Tile currentTile = tileMap.GetTile(doorPosition);
+            currentTile.SetTile(ETileType.TILE);
+        }
     }
 
-    private void GenerateMaze()
+    private void GenerateMaze(BoardPos _startPos, BoardPos _endPos)
     {
-        BoardPos startPos = pathfindManager.SearchStartPos;
-        BoardPos endPos = pathfindManager.SearchTargetPos;
-
         for(int x = 0; x < mapWidth; x++)
         {
             for(int y = 0; y < mapHeight; y++)
@@ -139,7 +141,7 @@ public class MapGenerator : MonoBehaviour
                 BoardPos currentBoardPos = new BoardPos(x, y);
                 Tile currentTile = tileMap.GetTile(currentBoardPos);
 
-                if(currentBoardPos.Equals(startPos) || currentBoardPos.Equals(endPos))
+                if(currentBoardPos.Equals(_startPos) || currentBoardPos.Equals(_endPos))
                 {
                     continue;
                 }

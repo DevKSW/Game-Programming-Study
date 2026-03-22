@@ -11,6 +11,7 @@ public class JPS : PathfindingBase
     public float HeuristicMultiplier => heuristicMultiplier;
 
     private AstarNode[,] jpsMap;
+    private List<BoardPos> jumpPoints;
 
     private Vector2Int[] directions =
     {
@@ -54,6 +55,7 @@ public class JPS : PathfindingBase
 
         List<AstarNode> openList = new List<AstarNode>();
         List<AstarNode> closedList = new List<AstarNode>();
+        jumpPoints = new List<BoardPos>();
 
         AstarNode startNode = jpsMap[_startPos.XPos, _startPos.YPos];
         startNode.GCost = 0;
@@ -86,6 +88,11 @@ public class JPS : PathfindingBase
                 if(jumpPoint == null || closedList.Contains(BoardPosToNode(jumpPoint.Value)) == true)
                 {
                     continue;
+                }
+                
+                if(jumpPoints.Contains(jumpPoint.Value) == false)
+                {
+                    jumpPoints.Add(jumpPoint.Value);
                 }
 
                 AstarNode neighborNode = BoardPosToNode(jumpPoint.Value);
@@ -213,7 +220,7 @@ public class JPS : PathfindingBase
         {
             yield return new WaitForSeconds(_searchDelay);
 
-            if(current.Equals(_start) == false)
+            if(current.Equals(_start) == false && jumpPoints.Contains(current) == false)
             {
                 MarkNodeWithColor(_start, _target, current, Color.yellow);
             }
@@ -225,7 +232,10 @@ public class JPS : PathfindingBase
                 break;
             }
 
-            MarkNodeWithColor(_start, _target, current, Color.orange);
+            if(jumpPoints.Contains(current) == false)
+            {
+                MarkNodeWithColor(_start, _target, current, Color.orange);
+            }
 
             if(current.Equals(_target) == true || IsForcedNeighborFounded(current, _direction) == true)
             {
