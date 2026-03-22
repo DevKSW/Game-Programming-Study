@@ -17,7 +17,7 @@ public class AstarNode
     public AstarNode(BoardPos _boardPos)
     {
         boardPos = _boardPos;
-        gCost = int.MaxValue;
-        hCost = 0;
+        gCost = int.MaxValue / 2;
+        hCost = int.MaxValue / 2;
     }
 }

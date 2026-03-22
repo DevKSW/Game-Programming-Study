@@ -42,6 +42,10 @@ public class MapGenerator : MonoBehaviour
             case EMapType.WALL:
                 GenerateWall();
                 break;
+
+            case EMapType.ROOM:
+                GenerateRoom();
+                break;
             
             case EMapType.MAZE:
                 GenerateMaze();
@@ -89,6 +93,33 @@ public class MapGenerator : MonoBehaviour
                 }
                 else if(x == halfWidth && y > halfHeight - halfHeight / 2 && y < halfHeight + halfHeight / 2 ||
                     y == halfHeight && x > halfWidth - halfWidth / 2 && x < halfWidth + halfWidth / 2)
+                {
+                    currentTile.SetTile(ETileType.OBSTACLE);
+                }
+            }
+        }
+    }
+
+    private void GenerateRoom()
+    {
+        BoardPos startPos = pathfindManager.SearchStartPos;
+        BoardPos endPos = pathfindManager.SearchTargetPos;
+
+        int halfWidth = mapWidth / 2;
+        int halfHeight = mapHeight / 2;
+
+        for(int x = 0; x < mapWidth; x++)
+        {
+            for(int y = 0; y < mapHeight; y++)
+            {
+                BoardPos currentBoardPos = new BoardPos(x, y);
+                Tile currentTile = tileMap.GetTile(currentBoardPos);
+
+                if(currentBoardPos.Equals(startPos) || currentBoardPos.Equals(endPos))
+                {
+                    continue;
+                }
+                else if((x == halfWidth && y != 1 && y != mapHeight - 2) || (y == halfHeight && x != 1 && x != mapWidth - 2))
                 {
                     currentTile.SetTile(ETileType.OBSTACLE);
                 }

@@ -9,6 +9,7 @@ public enum EMapType
 {
     DEFAULT,
     WALL,
+    ROOM,
     MAZE,
 }
 

@@ -345,7 +345,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e761bec26efb3da41bfbf198757f1925, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MapGenerator
-  mapType: 1
+  mapType: 2
   seed: 22
   mapWidth: 21
   mapHeight: 21
@@ -393,7 +393,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8fe55ea3f2f88c345a3b153d9b0538e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::JPS
-  heuristic: {fileID: 788706095}
+  heuristic: {fileID: 788706098}
   heuristicMultiplier: 1
 --- !u!4 &788706097
 Transform:
@@ -545,10 +545,10 @@ MonoBehaviour:
   pathfindingAlgorithm: {fileID: 788706096}
   searchStartPos:
     xPos: 0
-    yPos: 10
+    yPos: 1
   searchTargetPos:
     xPos: -1
-    yPos: 10
+    yPos: 20
   searchDelay: 0.02
 --- !u!114 &1088923956
 MonoBehaviour:

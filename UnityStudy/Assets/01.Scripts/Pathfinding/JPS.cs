@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class JPS : PathfindingBase
@@ -72,6 +71,12 @@ public class JPS : PathfindingBase
 
             ++visitCount;
 
+            if(currentNode.position.Equals(_targetPos) == true)
+            {
+                VisualizePath(_startPos, _targetPos);
+                yield break;
+            }
+
             //foreach (Vector2Int dir in directions)
             foreach (Vector2Int dir in GetPrunedDirections(currentNode))
             {
@@ -95,34 +100,10 @@ public class JPS : PathfindingBase
                     neighborNode.HCost = hCost;
                     neighborNode.ParentNode = currentNode;
 
-                    if(jumpPoint.Value.Equals(_targetPos) == true)
-                    {
-                        AstarNode backTrackingNode = neighborNode;
-
-                        while (backTrackingNode.ParentNode != null)
-                        {
-                            List<BoardPos> segment = GetPathBetweenBoardPos(backTrackingNode.ParentNode.position, backTrackingNode.position);
-                            AstarNode prevNode = backTrackingNode;
-                            backTrackingNode = backTrackingNode.ParentNode;
-
-                            foreach(BoardPos boardPos in segment)
-                            {
-                                if(BoardPosToNode(boardPos) != prevNode && BoardPosToNode(boardPos) != backTrackingNode)
-                                {
-                                    MarkNodeWithColor(_startPos, _targetPos, boardPos, Color.green, false);
-                                }
-                            }
-                        }
-
-                        yield break;
-                    }
-
                     if(openList.Contains(neighborNode) == false)
                     {
                         openList.Add(neighborNode);
                     }
-
-                    //MarkNodeWithColor(_startPos, _targetPos, neighborNode.position, Color.yellow);
                 }
             }
         }
@@ -357,5 +338,25 @@ public class JPS : PathfindingBase
         }
 
         return path;
+    }
+
+    private void VisualizePath(BoardPos _startPos, BoardPos _targetPos)
+    {
+        AstarNode currentNode = BoardPosToNode(_targetPos);
+
+        while (currentNode.ParentNode != null)
+        {
+            List<BoardPos> segment = GetPathBetweenBoardPos(currentNode.ParentNode.position, currentNode.position);
+            AstarNode prevNode = currentNode;
+            currentNode = currentNode.ParentNode;
+
+            foreach(BoardPos boardPos in segment)
+            {
+                if(BoardPosToNode(boardPos) != prevNode && BoardPosToNode(boardPos) != currentNode)
+                {
+                    MarkNodeWithColor(_startPos, _targetPos, boardPos, Color.green, false);
+                }
+            }
+        }
     }
 }
